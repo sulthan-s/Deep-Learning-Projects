@@ -1,0 +1,57 @@
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
+
+# Download and preprocess MNIST data
+transform = transforms.ToTensor()  # Convert images to tensor format
+train_dataset = datasets.MNIST(root='./data', train=True, transform=transform, download=True)
+test_dataset = datasets.MNIST(root='./data', train=False, transform=transform, download=True)
+
+# Load data in batches
+train_loader = DataLoader(dataset=train_dataset, batch_size=64, shuffle=True)
+test_loader = DataLoader(dataset=test_dataset, batch_size=1000)
+
+# Define a simple feedforward neural network
+class DigitClassifier(nn.Module):
+    def __init__(self):
+        super(DigitClassifier, self).__init__()
+        self.fc1 = nn.Linear(28*28, 128)  # Input layer to hidden layer
+        self.fc2 = nn.Linear(128, 10)     # Hidden layer to 10 output classes
+ 
+    def forward(self, x):
+        x = x.view(-1, 28*28)  # Flatten the image
+        x = F.relu(self.fc1(x))  # Apply ReLU activation
+        return self.fc2(x)  # Output logits for 10 digits
+ 
+model = DigitClassifier()
+
+# Use cross-entropy loss for multi-class classification
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+# Training loop
+for epoch in range(5):  # Train for 5 epochs
+    for images, labels in train_loader:
+        outputs = model(images)  # Forward pass
+        loss = criterion(outputs, labels)  # Compute loss
+ 
+        optimizer.zero_grad()  # Clear gradients
+        loss.backward()        # Backpropagation
+        optimizer.step()       # Update weights
+ 
+    print(f'Epoch {epoch+1}, Loss: {loss.item():.4f}')
+
+# Evaluate model accuracy on test data
+correct = 0
+total = 0
+with torch.no_grad():  # Disable gradient calculation for testing
+    for images, labels in test_loader:
+        outputs = model(images)
+        _, predicted = torch.max(outputs, 1)  # Get class with highest score
+        total += labels.size(0)
+        correct += (predicted == labels).sum().item()
+ 
+print(f'Test Accuracy: {100 * correct / total:.2f}%')
+
