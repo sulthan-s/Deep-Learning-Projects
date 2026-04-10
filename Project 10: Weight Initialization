@@ -1,0 +1,352 @@
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
+ 
+# Load FashionMNIST
+transform = transforms.ToTensor()
+train_data = datasets.FashionMNIST(root='./data', train=True, download=True, transform=transform)
+train_loader = DataLoader(train_data, batch_size=64, shuffle=True)
+ 
+# Define MLP with custom weight initialization
+class InitNet(nn.Module):
+    def __init__(self):
+        super(InitNet, self).__init__()
+        self.fc1 = nn.Linear(28*28, 256)
+        self.fc2 = nn.Linear(256, 128)
+        self.out = nn.Linear(128, 10)
+        self._init_weights()
+ 
+    def _init_weights(self):
+        nn.init.xavier_uniform_(self.fc1.weight)         # Xavier initialization
+        nn.init.kaiming_normal_(self.fc2.weight)          # He initialization
+        nn.init.constant_(self.out.weight, 0.01)          # Constant small weights
+        nn.init.zeros_(self.fc1.bias)                     # Zero biases
+        nn.init.zeros_(self.fc2.bias)
+        nn.init.zeros_(self.out.bias)
+ 
+    def forward(self, x):
+        x = x.view(-1, 28*28)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        return self.out(x)
+ 
+model = InitNet()
+ 
+# Define loss and optimizer
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+ 
+# Training loop
+for epoch in range(5):
+    for images, labels in train_loader:
+        outputs = model(images)
+        loss = criterion(outputs, labels)
+ 
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+ 
+    print(f"Epoch {epoch+1}, Loss: {loss.item():.4f}")
+Start
+20. Project 1: Linear Regression from Scratch
+1min
+Start
+21. Project 2: Logistic Regression Classifier
+1min
+Start
+22. Project 3: MNIST Digit Classifier
+1min
+Start
+23. Project 4: Binary Image Classifier (Cats vs Dogs)
+1min
+Start
+24. Project 5: Neural Network with Custom Activation
+1min
+Start
+25. Project 6: Softmax Classifier on FashionMNIST
+1min
+Start
+26. Project 7: Multi-layer Perceptron with Dropout
+1min
+Start
+27. Project 8: Visualizing Gradients using Hooks
+1min
+Start
+28. Project 9: Implement Batch Normalization
+1min
+Start
+29. Project 10: Weight Initialization
+1min
+Start
+30. Project 11: Handwritten Character Recognition (EMNIST)
+1min
+Start
+31. Project 12: XOR Neural Network
+1min
+Start
+32. Project 13: Sentiment Classifier with Bag-of-Words
+1min
+Start
+33. Project 14: CNN on CIFAR-10
+1min
+Start
+34. Project 15: Image Denoising with Autoencoders
+1min
+Start
+35. Project 16: PyTorch Lightning Hello World
+1min
+Start
+36. Project 17: Image Augmentation Pipeline
+1min
+Start
+37. Project 18: Saving & Loading Models
+1min
+Start
+38. Project 19: Confusion Matrix Visualization
+1min
+Start
+39. Project 20: Training Loop vs DataLoader Comparison
+1min
+Start
+40. Project 21: LeNet Implementation
+1min
+Start
+41. Project 22: AlexNet from Scratch
+1min
+Start
+42. Project 23: VGG-16 Classifier
+1min
+Start
+43. Project 24: ResNet-18 with Transfer Learning
+1min
+Start
+44. Project 25: Inception Network (GoogLeNet)
+1min
+Start
+45. Project 26: MobileNetV2 for Mobile Inference
+1min
+Start
+46. Project 27: EfficientNet on Custom Dataset
+1min
+Start
+47. Project 28: Custom CNN with Skip Connections
+1min
+Start
+48. Project 29: Training with Mixed Precision (AMP)
+1min
+Start
+49. Project 30: Visualize Feature Maps in CNN
+1min
+Start
+50. Project 31: Grad-CAM Visualization
+1min
+Start
+51. Project 32: Fine-Tune Pretrained ResNet
+1min
+Start
+52. Project 33: Train a Network on GPU and CPU
+1min
+Start
+53. Project 34: Comparison of Optimizers (SGD vs Adam)
+1min
+Start
+54. Project 35: Neural Style Transfer
+1min
+Start
+55. Project 36: Siamese Network for Face Similarity
+1min
+Start
+56. Project 37: Implement CutMix & MixUp
+1min
+Start
+57. Project 38: Contrastive Learning with SimCLR
+1min
+Start
+58. Project 39: Vision Transformer (ViT) from Scratch
+1min
+Start
+59. Project 40: Swin Transformer Mini Project
+1min
+Start
+60. Project 41: Text Classification with RNN
+1min
+Start
+61. Project 42: Named Entity Recognition (NER)
+1min
+Start
+62. Project 43: Bi-LSTM for Sequence Tagging
+1min
+Start
+63. Project 44: GRU vs LSTM Comparison
+1min
+Start
+64. Project 45: Character-Level Language Model
+1min
+Start
+65. Project 46: Machine Translation with Seq2Seq
+1min
+Start
+66. Project 47: Transformer-Based Text Summarization
+1min
+Start
+67. Project 48: Text Generation with GPT-2
+1min
+Start
+68. Project 49: Fine-Tune BERT for Sentiment Analysis
+1min
+Start
+69. Project 50: Question Answering with BERT
+1min
+Start
+70. Project 51: Semantic Search with Sentence Transformers
+1min
+Start
+71. Project 52: Text Clustering using Sentence Embeddings
+1min
+Start
+72. Project 53: Text Classification using DistilBERT
+1min
+Start
+73. Project 54: Text-to-Image Embedding with CLIP
+1min
+Start
+74. Project 55: Visual Question Answering with BLIP
+1min
+Start
+75. Project 56: OCR with Transformers (TrOCR)
+1min
+Start
+76. Project 57: Zero-Shot Text Classification with NLI Models
+1min
+Start
+77. Project 58: Multimodal Sentiment Analysis (Text + Image)
+1min
+Start
+78. Project 59: Speech-to-Text with Wav2Vec2
+1min
+Start
+79. Project 60: Speech Emotion Recognition
+1min
+Start
+80. Project 61: Audio Classification with CNNs
+1min
+Start
+81. Project 62: Real-Time Audio Classification
+1min
+Start
+82. Project 63: Keyword Spotting with Custom Commands
+1min
+Start
+83. Project 64: Real-Time Keyword Spotting with Microphone Input
+1min
+Start
+84. Project 65: Emotion Detection from Facial Images
+1min
+Start
+85. Project 66: Gender and Age Prediction from Faces
+1min
+Start
+86. Project 67: Real-Time Face Recognition System
+1min
+Start
+87. Project 68: Mask Detection on Live Video Feed
+1min
+Start
+88. Project 69: Gesture Recognition using Hand Keypoints
+1min
+Start
+89. Project 70: Eye Gaze Tracking and Blink Detection
+1min
+Start
+90. Project 71: Pose Estimation with MediaPipe
+1min
+Start
+91. Project 72: Yoga Pose Correction System
+1min
+Start
+92. Project 73: Sign Language Alphabet Recognition
+1min
+Start
+93. Project 74: Real-Time ASL Recognition with Webcam
+1min
+Start
+94. Project 75: Text-to-Speech (TTS) with Tacotron2 and WaveGlow
+1min
+Start
+95. Project 76: Neural Voice Cloning (Multi-Speaker TTS)
+1min
+Start
+96. Project 77: Music Genre Classification with CNNs
+1min
+Start
+97. Project 78: Music Generation with RNN (Note Sequences)
+1min
+Start
+98. Project 79: Automatic Chord Recognition from Audio
+1min
+Start
+99. Project 80: Audio Denoising with Autoencoders
+1min
+Start
+100. Project 81: Real-Time Noise Suppression using Denoising Autoencoder
+1min
+Start
+101. Project 82: Speaker Diarization (Who Spoke When)
+1min
+Start
+102. Project 83: Real-Time Speaker Identification
+1min
+Start
+103. Project 84: Voice Activity Detection (VAD)
+1min
+Start
+104. Project 85: Transcription with Speaker Tags (ASR + Diarization)
+1min
+Start
+105. Project 86: Emotion-Aware Transcription System
+1min
+Start
+106. Project 87: Audio-Driven Avatar Lip Sync Generator
+1min
+Start
+107. Project 88: Music Source Separation (Vocals, Drums, etc.)
+1min
+Start
+108. Project 89: Audio Captioning (Describing Sound Events)
+1min
+Start
+109. Project 90: Acoustic Scene Classification
+1min
+Start
+110. Project 91: Urban Sound Event Detection (Gunshot, Siren, Dog Bark, etc.)
+1min
+Start
+111. Project 92: Audio Fingerprinting and Song Recognition (Shazam-Like System)
+1min
+Start
+112. Project 93: Environmental Sound Tagging (Multi-Label Audio Classification)
+1min
+Start
+113. Project 94: AI Audio Scene Narrator (Sound → Story Description)
+1min
+Start
+114. Project 95: Lip Reading from Silent Video using Vision Transformers
+1min
+Start
+115. Project 96: Audio-Visual Emotion Recognition (Multimodal)
+1min
+Start
+116. Project 97: Audio Style Transfer (Convert Guitar to Violin Style)
+1min
+Start
+117. Project 98: Audio-Based Anomaly Detection (Industrial Machines, ECG, etc.)
+1min
+Start
+118. Project 99: Speaker Conversion (Make One Voice Sound Like Another)
+1min
+Start
+119. Project 100: Real-Time Voice Cloning and Emotion Transfer
+1min
+
