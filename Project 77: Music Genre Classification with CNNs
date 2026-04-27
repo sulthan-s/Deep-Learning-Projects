@@ -1,0 +1,76 @@
+import torch
+import torch.nn as nn
+import torchaudio
+from torchaudio.transforms import MelSpectrogram, AmplitudeToDB
+from torch.utils.data import DataLoader, Dataset
+import os
+ 
+# Music dataset structure:
+# data/music_genre/rock/xxx.wav, jazz/yyy.wav, etc.
+class MusicGenreDataset(Dataset):
+    def __init__(self, root, transform):
+        self.samples = []
+        self.labels = []
+        self.label_map = {}
+        self.transform = transform
+ 
+        genres = sorted(os.listdir(root))
+        for idx, genre in enumerate(genres):
+            self.label_map[genre] = idx
+            genre_dir = os.path.join(root, genre)
+            for file in os.listdir(genre_dir):
+                if file.endswith(".wav"):
+                    self.samples.append(os.path.join(genre_dir, file))
+                    self.labels.append(idx)
+ 
+    def __len__(self):
+        return len(self.samples)
+ 
+    def __getitem__(self, index):
+        audio, sr = torchaudio.load(self.samples[index])
+        mel = self.transform(audio)
+        label = self.labels[index]
+        return mel.squeeze(0), label
+ 
+# Mel-spectrogram transform
+transform = nn.Sequential(
+    MelSpectrogram(sample_rate=22050, n_mels=64),
+    AmplitudeToDB()
+)
+ 
+# Load dataset
+dataset = MusicGenreDataset("./data/music_genre", transform)
+loader = DataLoader(dataset, batch_size=16, shuffle=True)
+ 
+# CNN model
+class GenreCNN(nn.Module):
+    def __init__(self, num_classes):
+        super().__init__()
+        self.conv = nn.Sequential(
+            nn.Conv2d(1, 16, 3, padding=1), nn.ReLU(), nn.MaxPool2d(2),
+            nn.Conv2d(16, 32, 3, padding=1), nn.ReLU(), nn.AdaptiveAvgPool2d((1, 1))
+        )
+        self.fc = nn.Linear(32, num_classes)
+ 
+    def forward(self, x):
+        x = x.unsqueeze(1)  # Add channel dim
+        x = self.conv(x)
+        return self.fc(x.squeeze(-1).squeeze(-1))
+ 
+# Setup model
+num_genres = len(set(dataset.labels))
+model = GenreCNN(num_classes=num_genres)
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+ 
+# Training loop
+for epoch in range(5):
+    for x, y in loader:
+        outputs = model(x)
+        loss = criterion(outputs, y)
+ 
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+ 
+    print(f"Epoch {epoch+1}, Loss: {loss.item():.4f}")
